@@ -1,0 +1,29 @@
+Welcome to the Big TODO!
+
+- Something to be done
+o Something in-progress
+x Something done
+
+x Make basic battler
+x Make battlers move (they go left, or right if enemy!, fear will be added later)
+o Make battlers attack (they stop when in range of an enemy which is yay!)
+	x Make battlers stop when in range of another enemy (probably done but keep checking)
+	o Make battlers follow cancellable pre-windup of like 0.5 seconds
+		- Check to make sure it actually cancels
+	x Make battlers do windup of whatever their stat is (also make it cancellable through script but not automatically when enemy leaves range; im preparing for ivory but also stun/super stun)
+	x Make battlers actually do attacks
+		x Make battlers be able to damage each other
+o Make battlers have health
+	x Make battlers have visible health bar
+	x Make battlers be able to take damage
+	o Make battlers able to die
+	- (future thing) Make battlers have phases (and could potentially survive lethal hits like lil' cesus, tumored/tarnished sword)
+- Make battlers follow gravity (probably custom idk; maybe not idk)
+- Make bases
+- Make battlers spawnable
+	- Figure out how to make UI
+		- Figure out how to make a button
+
+BATTLERS TODO:
+chapter 1 battlers and enemies
+currently implemented: the 8 normal battlers

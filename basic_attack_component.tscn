@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddin6lpypefo"]
+
+[ext_resource type="Script" uid="uid://bbl0rfpy1k4ht" path="res://basic_attack_component.gd" id="1_dtour"]
+
+[node name="BasicAttackComponent" type="Node"]
+script = ExtResource("1_dtour")

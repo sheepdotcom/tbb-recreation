@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://cvihjhrrfteto"]
+
+[ext_resource type="Script" uid="uid://cr8woln3ff2re" path="res://hitbox_component.gd" id="1_ouix1"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_us8do"]
+
+[node name="HitboxComponent" type="Area3D"]
+script = ExtResource("1_ouix1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_us8do")

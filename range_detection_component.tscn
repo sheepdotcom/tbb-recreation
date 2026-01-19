@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2hj1n1kvsbpf"]
+
+[ext_resource type="Script" uid="uid://d2bp5ml7insm8" path="res://range_detection_component.gd" id="1_5we7s"]
+
+[node name="RangeDetectionComponent" type="Node3D"]
+process_physics_priority = -1
+script = ExtResource("1_5we7s")

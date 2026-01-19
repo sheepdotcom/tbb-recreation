@@ -1,0 +1,65 @@
+[gd_scene load_steps=9 format=3 uid="uid://csx1b2pkuiepw"]
+
+[ext_resource type="Script" uid="uid://b8uqqibftmvum" path="res://battler.gd" id="1_7jvhn"]
+[ext_resource type="Script" uid="uid://cr8woln3ff2re" path="res://hitbox_component.gd" id="2_e008c"]
+[ext_resource type="Script" uid="uid://d2bp5ml7insm8" path="res://range_detection_component.gd" id="3_8njye"]
+[ext_resource type="Script" uid="uid://cfbbft2c5sq5r" path="res://health_component.gd" id="4_66ygq"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_6qqko"]
+radius = 1.0
+height = 5.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7jvhn"]
+size = Vector3(2, 5, 2)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e008c"]
+radius = 1.0
+height = 5.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_8njye"]
+radius = 3.0
+
+[node name="Battler" type="CharacterBody3D"]
+script = ExtResource("1_7jvhn")
+damage = 10
+
+[node name="Pivot" type="Node3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pivot"]
+mesh = SubResource("CapsuleMesh_6qqko")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_7jvhn")
+
+[node name="HitboxComponent" type="Area3D" parent="." node_paths=PackedStringArray("parent", "health_component")]
+script = ExtResource("2_e008c")
+parent = NodePath("..")
+health_component = NodePath("../HealthComponent")
+metadata/_custom_type_script = "uid://cr8woln3ff2re"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxComponent"]
+shape = SubResource("CapsuleShape3D_e008c")
+
+[node name="RangeDetectionComponent" type="Node3D" parent="." node_paths=PackedStringArray("hitbox_component", "range_area")]
+script = ExtResource("3_8njye")
+hitbox_component = NodePath("../HitboxComponent")
+range_area = NodePath("../RangeArea")
+metadata/_custom_type_script = "uid://d2bp5ml7insm8"
+
+[node name="RangeArea" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RangeArea"]
+shape = SubResource("SphereShape3D_8njye")
+debug_color = Color(0.6804357, 0.2994788, 1, 0.41960785)
+
+[node name="HealthComponent" type="Node3D" parent="." node_paths=PackedStringArray("parent")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+script = ExtResource("4_66ygq")
+parent = NodePath("..")
+metadata/_custom_type_script = "uid://cfbbft2c5sq5r"
+
+[node name="AttackTimer" type="Timer" parent="."]
+process_callback = 0
+one_shot = true
+
+[connection signal="timeout" from="AttackTimer" to="." method="_on_attack_timer_timeout"]
