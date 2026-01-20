@@ -21,19 +21,8 @@ var health: int = max_health:
 var health_bar: ProgressBar = null
 var health_label: Label = null
 
-var scene = preload("res://health_bar.tscn").instantiate()
-
 func _ready():
 	assert(parent != null)
-	
-	# preload scene, instantiate it, add it as a child, then reparent all its children to self, then delete the container they were in
-	# lets just call this a hack
-	add_child(scene)
-	for child in scene.get_children():
-		child.reparent(self)
-		#add_child(child)
-		
-	scene.free()
 	
 	health_bar = $SubViewport/ProgressBar
 	health_label = health_bar.get_node("Label")

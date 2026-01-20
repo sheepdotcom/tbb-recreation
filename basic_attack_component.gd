@@ -1,4 +1,4 @@
-extends BaseAttackComponent
+extends CoreAttackComponent
 
 func _on_attack():
 	var closest_enemy := parent.get_closest_enemy()

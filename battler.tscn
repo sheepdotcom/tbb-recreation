@@ -1,9 +1,9 @@
 [gd_scene load_steps=9 format=3 uid="uid://csx1b2pkuiepw"]
 
 [ext_resource type="Script" uid="uid://b8uqqibftmvum" path="res://battler.gd" id="1_7jvhn"]
-[ext_resource type="Script" uid="uid://cr8woln3ff2re" path="res://hitbox_component.gd" id="2_e008c"]
-[ext_resource type="Script" uid="uid://d2bp5ml7insm8" path="res://range_detection_component.gd" id="3_8njye"]
-[ext_resource type="Script" uid="uid://cfbbft2c5sq5r" path="res://health_component.gd" id="4_66ygq"]
+[ext_resource type="PackedScene" uid="uid://d2hj1n1kvsbpf" path="res://range_detection_component.tscn" id="5_5muag"]
+[ext_resource type="PackedScene" uid="uid://cvihjhrrfteto" path="res://hitbox_component.tscn" id="5_8ey71"]
+[ext_resource type="PackedScene" uid="uid://d1v65w1aur6h0" path="res://health_component.tscn" id="5_e88s5"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_6qqko"]
 radius = 1.0
@@ -12,7 +12,7 @@ height = 5.0
 [sub_resource type="BoxShape3D" id="BoxShape3D_7jvhn"]
 size = Vector3(2, 5, 2)
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e008c"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_8ey71"]
 radius = 1.0
 height = 5.0
 
@@ -31,20 +31,14 @@ mesh = SubResource("CapsuleMesh_6qqko")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_7jvhn")
 
-[node name="HitboxComponent" type="Area3D" parent="." node_paths=PackedStringArray("parent", "health_component")]
-script = ExtResource("2_e008c")
+[node name="HitboxComponent" parent="." node_paths=PackedStringArray("parent", "health_component") instance=ExtResource("5_8ey71")]
 parent = NodePath("..")
 health_component = NodePath("../HealthComponent")
-metadata/_custom_type_script = "uid://cr8woln3ff2re"
+shape = SubResource("CapsuleShape3D_8ey71")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="HitboxComponent"]
-shape = SubResource("CapsuleShape3D_e008c")
-
-[node name="RangeDetectionComponent" type="Node3D" parent="." node_paths=PackedStringArray("hitbox_component", "range_area")]
-script = ExtResource("3_8njye")
+[node name="RangeDetectionComponent" parent="." node_paths=PackedStringArray("hitbox_component", "range_area") instance=ExtResource("5_5muag")]
 hitbox_component = NodePath("../HitboxComponent")
 range_area = NodePath("../RangeArea")
-metadata/_custom_type_script = "uid://d2bp5ml7insm8"
 
 [node name="RangeArea" type="Area3D" parent="."]
 
@@ -52,11 +46,9 @@ metadata/_custom_type_script = "uid://d2bp5ml7insm8"
 shape = SubResource("SphereShape3D_8njye")
 debug_color = Color(0.6804357, 0.2994788, 1, 0.41960785)
 
-[node name="HealthComponent" type="Node3D" parent="." node_paths=PackedStringArray("parent")]
+[node name="HealthComponent" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("5_e88s5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
-script = ExtResource("4_66ygq")
 parent = NodePath("..")
-metadata/_custom_type_script = "uid://cfbbft2c5sq5r"
 
 [node name="AttackTimer" type="Timer" parent="."]
 process_callback = 0

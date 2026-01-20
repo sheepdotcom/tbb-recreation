@@ -17,12 +17,19 @@ o Make battlers have health
 	x Make battlers have visible health bar
 	x Make battlers be able to take damage
 	o Make battlers able to die
+	- Make armor work
+	- Make resistance work
+	- Make armor and resistance piercing (preparing for sniper, fencer/scherma, miner/prospect)
 	- (future thing) Make battlers have phases (and could potentially survive lethal hits like lil' cesus, tumored/tarnished sword)
 - Make battlers follow gravity (probably custom idk; maybe not idk)
 - Make bases
 - Make battlers spawnable
 	- Figure out how to make UI
 		- Figure out how to make a button
+o Moveable Camera
+	- Moving in a direction tilts the camera a bit that way (i think? idk)
+	- Camera looks towards the camera
+	- Camer shake i guess?
 
 BATTLERS TODO:
 chapter 1 battlers and enemies

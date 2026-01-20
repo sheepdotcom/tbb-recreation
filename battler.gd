@@ -51,7 +51,7 @@ var attack_timer: Timer
 
 enum AttackingState { NONE, PRE_WINDUP, WINDUP, ATTACKING }
 
-var attack_component: BaseAttackComponent
+var attack_component: CoreAttackComponent
 var attacking_state := AttackingState.NONE
 
 signal on_pre_windup() # equivalent of on enemy spotted or something idk

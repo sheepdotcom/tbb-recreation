@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://b3qag1q82vrpw"]
+
+[ext_resource type="Script" uid="uid://ddkcajly65fso" path="res://base.gd" id="1_rpg24"]
+[ext_resource type="PackedScene" uid="uid://d1v65w1aur6h0" path="res://health_component.tscn" id="3_8rhti"]
+[ext_resource type="PackedScene" uid="uid://cvihjhrrfteto" path="res://hitbox_component.tscn" id="4_ohhpf"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g5ejs"]
+size = Vector3(9, 9, 9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rpg24"]
+size = Vector3(9, 9, 9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_21bcp"]
+size = Vector3(9, 9, 9)
+
+[node name="Base" type="StaticBody3D"]
+script = ExtResource("1_rpg24")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_g5ejs")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_rpg24")
+
+[node name="HealthComponent" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("3_8rhti")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+parent = NodePath("..")
+
+[node name="HitboxComponent" parent="." node_paths=PackedStringArray("parent", "health_component") instance=ExtResource("4_ohhpf")]
+parent = NodePath("..")
+health_component = NodePath("../HealthComponent")
+shape = SubResource("BoxShape3D_21bcp")
