@@ -15,7 +15,7 @@ class_name HitboxComponent
 		assert(health_component != null)
 
 @export var is_enemy = false
-@export var is_invisible = false
+@export var is_untargettable = false
 
 @export_group("Collision Shape")
 @export var shape: Shape3D:

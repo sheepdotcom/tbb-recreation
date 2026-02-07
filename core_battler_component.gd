@@ -1,8 +1,8 @@
 extends Node3D
 
-# the base for all battler's attack components
+# the base for all battler's components
 # gives a base type with the functions that can be hooked onto and the parent variable
-class_name CoreAttackComponent
+class_name CoreBattlerComponent
 
 # why battler and not like hitbox component? what about bases?
 # well, non-battlers get their own custom attack stuff (since they don't follow the same pre-windup, windup, attack scheme)
@@ -33,6 +33,16 @@ func _on_attack():
 
 # don't think this one gonna ever be used lol
 func _on_attack_finished():
+	pass
+
+
+# run functions when taking damage i guess (called by the function that handles actually dealing damage)
+func _on_damage():
+	pass
+
+
+# runs on death, though its not for units with a death attack (that will be handled as a phase)
+func _on_death():
 	pass
 
 

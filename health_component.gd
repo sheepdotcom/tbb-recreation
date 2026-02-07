@@ -30,8 +30,31 @@ func _ready():
 	update_health_bar()
 
 
-func damage(amount: int):
-	health = health - amount
+# damage this thing or whatever, reason for damager is so we can get attributes that would multiply damage or do other stuff
+# attributes like armor/resistance piercing and or damage multiplying, anti-*, red units <50% hp, 3x damage to omni-immunity
+# TODO: figure out how tf to code and detect libery cannon activation
+# TODO: figure out how to do the highlighting when damaged thing and the custom highlight colors for armor and resistance
+func damage(amount: int, attacker: HitboxComponent):
+	var amt: float = amount # i love being terrible at naming variables
+	
+	if attacker.parent is Battler:
+		var other = attacker.parent as Battler
+		if parent is Battler:
+			pass
+		elif parent is Base:
+			if other.abilities.has(BattlerEnums.Abilities.BASE_DESTROYER):
+				amt *= 3.0
+	
+	health = health - round(amt) # TODO: test if .5 rounds up or down (tbb does something wierd i think idk)
+	
+	if health <= 0:
+		kill(attacker)
+
+
+func kill(attacker: HitboxComponent):
+	# TODO: death animation whatever
+	if parent is Battler:
+		parent.is_dying = true
 
 
 func update_health_bar():

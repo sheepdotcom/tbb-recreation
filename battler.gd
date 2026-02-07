@@ -44,6 +44,28 @@ class_name Battler
 # most likely be a 3 frame after pre windup windup or something idk
 # sword battler has no pre windup, he instantly attacks (animation bugs a little though)
 
+var is_untargettable := false:
+	set(value):
+		is_untargettable = value
+		_update_untargettable()
+
+# untargettable + cloak effects, thats it
+var is_cloaked := false:
+	set(value):
+		is_cloaked = value
+		_update_untargettable()
+
+var is_invincible := false # shortcut to override with 100% resistance (which still makes everything do 1 damage)
+var is_true_invincible := false # true invincibility (100% resistance but 0 damage from all sources)
+
+# doing death animation, lil' doombringers death attack does not count for this, since he is still alive, this is post-death, post-0hp, which tarnished sword's counts for this
+var is_dying := false:
+	set(value):
+		is_dying = value
+		_update_untargettable()
+
+var abilities: int = 0 # abilities (bit flag)
+
 var hitbox: HitboxComponent
 var range_detector: RangeDetectionComponent
 var health_component: HealthComponent
@@ -51,7 +73,7 @@ var attack_timer: Timer
 
 enum AttackingState { NONE, PRE_WINDUP, WINDUP, ATTACKING }
 
-var attack_component: CoreAttackComponent
+var attack_component: CoreBattlerComponent
 var attacking_state := AttackingState.NONE
 
 signal on_pre_windup() # equivalent of on enemy spotted or something idk
@@ -88,22 +110,26 @@ func _ready():
 	_update_is_enemy()
 	_update_attack_range()
 	_update_max_health()
+	_update_untargettable()
 
 
-func _physics_process(_delta: float) -> void:
-	# for movement later do something with vectors and also handle walkspeed (de)buffs
-	# (later) basically assume left is the direction we want to go and apply stuff
-	# (later) then apply is_enemy onto it so enemies go right
-	# (later) this is to handle things like fear or whatever else (when implemented)
-	if !range_detector.enemies_in_range.is_empty() || attacking_state >= AttackingState.WINDUP:
-		velocity = _physics_attacking()
+func _physics_process(_delta: float) -> void:	
+	if is_dying:
+		velocity = Vector3.ZERO
 	else:
-		# cancel prewindup if enemy exits range
-		if attacking_state == AttackingState.PRE_WINDUP:
-			attacking_state = AttackingState.NONE
-			attack_timer.stop()
-		
-		velocity = _physics_not_attacking()
+		# for movement later do something with vectors and also handle walkspeed (de)buffs
+		# (later) basically assume left is the direction we want to go and apply stuff
+		# (later) then apply is_enemy onto it so enemies go right
+		# (later) this is to handle things like fear or whatever else (when implemented)
+		if range_detector.is_an_enemy_in_range() || attacking_state >= AttackingState.WINDUP:
+			velocity = _physics_attacking()
+		else:
+			# cancel prewindup if enemy exits range
+			if attacking_state == AttackingState.PRE_WINDUP:
+				attacking_state = AttackingState.NONE
+				attack_timer.stop()
+			
+			velocity = _physics_not_attacking()
 	move_and_slide()
 
 
@@ -166,19 +192,7 @@ func do_attack():
 
 
 func get_closest_enemy() -> HitboxComponent:
-	# (later) do some math to figure out what the closest point would be on certain shapes
-	# for now we do center to center check but subtract radius as a very basic way to determine edge to edge distance
-	var closest_enemy: HitboxComponent = null
-	var smallest_distance := INF
-	
-	# find closest enemy
-	for enemy in range_detector.enemies_in_range:
-		var distance = enemy.position.distance_squared_to(position)
-		if distance < smallest_distance:
-			smallest_distance = distance
-			closest_enemy = enemy
-	
-	return closest_enemy
+	return range_detector.get_closest_enemy()
 
 
 func get_actual_damage() -> int:
@@ -186,23 +200,28 @@ func get_actual_damage() -> int:
 	return damage
 
 
+func get_actual_walkspeed() -> float:
+	# TODO: account for buffs or debuffs or whatever
+	return walkspeed
+
+
 # can also be used for updating is_alt due to alt forms basically being a separate battler
 func _update_id():
 	# TODO: remove these when a proper spawning function is in place that handles stats itself and not in here i guess?
-	max_health = BattlerEnums.get_health(id, is_alt)
-	armor = BattlerEnums.get_armor(id, is_alt)
-	resistance = BattlerEnums.get_resistance(id, is_alt)
-	damage = BattlerEnums.get_damage(id, is_alt)
-	attack_rate = BattlerEnums.get_attack_rate(id, is_alt)
-	attack_range = BattlerEnums.get_attack_range(id, is_alt)
-	walkspeed = BattlerEnums.get_walkspeed(id, is_alt)
-	windup = BattlerEnums.get_windup(id, is_alt)
-	pre_windup = BattlerEnums.get_pre_windup(id, is_alt)
+	max_health = BattlerEnums.get_health(id)
+	armor = BattlerEnums.get_armor(id)
+	resistance = BattlerEnums.get_resistance(id)
+	damage = BattlerEnums.get_damage(id)
+	attack_rate = BattlerEnums.get_attack_rate(id)
+	attack_range = BattlerEnums.get_attack_range(id)
+	walkspeed = BattlerEnums.get_walkspeed(id)
+	windup = BattlerEnums.get_windup(id)
+	pre_windup = BattlerEnums.get_pre_windup(id)
 	
 	if attack_component != null:
 		attack_component.queue_free()
 	
-	attack_component = BattlerEnums.create_component(id, is_alt)
+	attack_component = BattlerEnums.create_component(id)
 	attack_component.parent = self
 	
 	on_pre_windup.connect(attack_component._on_pre_windup)
@@ -228,10 +247,15 @@ func _update_max_health():
 		health_component.max_health = max_health
 
 
+func _update_untargettable():
+	if hitbox != null:
+		hitbox.is_untargettable = is_untargettable || is_cloaked || is_dying
+
+
 func _on_attack_timer_timeout() -> void:
 	match attacking_state:
 		AttackingState.PRE_WINDUP:
-			if !range_detector.enemies_in_range.is_empty():
+			if range_detector.is_an_enemy_in_range():
 				start_windup()
 		AttackingState.WINDUP:
 			do_attack()

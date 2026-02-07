@@ -21,7 +21,18 @@ radius = 3.0
 
 [node name="Battler" type="CharacterBody3D"]
 script = ExtResource("1_7jvhn")
+id = null
+is_alt = null
+is_enemy = null
+max_health = null
+armor = null
+resistance = null
 damage = 10
+attack_rate = null
+attack_range = null
+walkspeed = null
+windup = null
+pre_windup = null
 
 [node name="Pivot" type="Node3D" parent="."]
 

@@ -31,6 +31,15 @@ o Moveable Camera
 	- Camera looks towards the camera
 	- Camer shake i guess?
 
+IM SCARED FOR:
+- Anything that doesn't simply do a single attack in a single phase (aka literally every boss)
+- Projectiles
+	- Projectiles that pierce
+	- Projectiles that explode
+	- Projectiles that follow GRAVITY (uh oh)
+		- Projectile PHYSICS (MORE UH OH)
+- EXEC's corrupt im actually scared like wdym INTENTIONALLY SWAPPING TEXTURES, CLOTHING, ANIMATIONS, SOUNDS, AND COLORS?!?!
+
 BATTLERS TODO:
 chapter 1 battlers and enemies
 currently implemented: the 8 normal battlers
