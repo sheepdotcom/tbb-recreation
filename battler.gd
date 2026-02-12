@@ -4,9 +4,10 @@ class_name Battler
 
 # the default stuff here is referencing the stats of Battler, he is the default (obviously)
 # battler id; only normal battlers exist right now
-@export var id := BattlerEnums.ID.BATTLER
-# is the battler in their alt form (not implemented yet)
-@export var is_alt := false
+@export var id := BattlerEnums.ID.BATTLER:
+	set(value):
+		id = value
+		_update_id()
 # is the battler an enemy
 @export var is_enemy := false:
 	set(value):
@@ -64,6 +65,11 @@ var is_dying := false:
 		is_dying = value
 		_update_untargettable()
 
+# disables this things attack function, letting the battler's component handle the entire attack function
+var uses_custom_attack := false:
+	set(value):
+		uses_custom_attack = value
+
 var abilities: int = 0 # abilities (bit flag)
 
 var hitbox: HitboxComponent
@@ -113,7 +119,7 @@ func _ready():
 	_update_untargettable()
 
 
-func _physics_process(_delta: float) -> void:	
+func _physics_process(_delta: float) -> void:
 	if is_dying:
 		velocity = Vector3.ZERO
 	else:

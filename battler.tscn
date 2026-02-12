@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://csx1b2pkuiepw"]
+[gd_scene format=3 uid="uid://csx1b2pkuiepw"]
 
 [ext_resource type="Script" uid="uid://b8uqqibftmvum" path="res://battler.gd" id="1_7jvhn"]
 [ext_resource type="PackedScene" uid="uid://d2hj1n1kvsbpf" path="res://range_detection_component.tscn" id="5_5muag"]
@@ -19,49 +19,38 @@ height = 5.0
 [sub_resource type="SphereShape3D" id="SphereShape3D_8njye"]
 radius = 3.0
 
-[node name="Battler" type="CharacterBody3D"]
+[node name="Battler" type="CharacterBody3D" unique_id=577338451]
 script = ExtResource("1_7jvhn")
-id = null
-is_alt = null
-is_enemy = null
-max_health = null
-armor = null
-resistance = null
 damage = 10
-attack_rate = null
-attack_range = null
-walkspeed = null
-windup = null
-pre_windup = null
 
-[node name="Pivot" type="Node3D" parent="."]
+[node name="Pivot" type="Node3D" parent="." unique_id=1532767645]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pivot"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pivot" unique_id=1661415346]
 mesh = SubResource("CapsuleMesh_6qqko")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1973664017]
 shape = SubResource("BoxShape3D_7jvhn")
 
-[node name="HitboxComponent" parent="." node_paths=PackedStringArray("parent", "health_component") instance=ExtResource("5_8ey71")]
+[node name="HitboxComponent" parent="." unique_id=916447590 node_paths=PackedStringArray("parent", "health_component") instance=ExtResource("5_8ey71")]
 parent = NodePath("..")
 health_component = NodePath("../HealthComponent")
 shape = SubResource("CapsuleShape3D_8ey71")
 
-[node name="RangeDetectionComponent" parent="." node_paths=PackedStringArray("hitbox_component", "range_area") instance=ExtResource("5_5muag")]
+[node name="RangeDetectionComponent" parent="." unique_id=1943372935 node_paths=PackedStringArray("hitbox_component", "range_area") instance=ExtResource("5_5muag")]
 hitbox_component = NodePath("../HitboxComponent")
 range_area = NodePath("../RangeArea")
 
-[node name="RangeArea" type="Area3D" parent="."]
+[node name="RangeArea" type="Area3D" parent="." unique_id=289395791]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RangeArea"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RangeArea" unique_id=1670472753]
 shape = SubResource("SphereShape3D_8njye")
 debug_color = Color(0.6804357, 0.2994788, 1, 0.41960785)
 
-[node name="HealthComponent" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("5_e88s5")]
+[node name="HealthComponent" parent="." unique_id=1962432587 node_paths=PackedStringArray("parent") instance=ExtResource("5_e88s5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 parent = NodePath("..")
 
-[node name="AttackTimer" type="Timer" parent="."]
+[node name="AttackTimer" type="Timer" parent="." unique_id=1121245334]
 process_callback = 0
 one_shot = true
 

@@ -4,5 +4,3 @@
 
 [node name="Game" type="Node" unique_id=1276485015]
 script = ExtResource("1_80nbo")
-chapter = null
-stage = null
