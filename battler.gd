@@ -45,6 +45,9 @@ class_name Battler
 # most likely be a 3 frame after pre windup windup or something idk
 # sword battler has no pre windup, he instantly attacks (animation bugs a little though)
 
+# magnification determines the multiplier for certain stats ONLY when updating id
+var magnification := 1.0
+
 var is_untargettable := false:
 	set(value):
 		is_untargettable = value
@@ -65,10 +68,8 @@ var is_dying := false:
 		is_dying = value
 		_update_untargettable()
 
-# disables this things attack function, letting the battler's component handle the entire attack function
-var uses_custom_attack := false:
-	set(value):
-		uses_custom_attack = value
+# connecting to this disables the default attack/move function, letting the battler's component handle it all
+signal on_physics_process(delta: float)
 
 var abilities: int = 0 # abilities (bit flag)
 
@@ -115,14 +116,13 @@ func _ready():
 	_update_id()
 	_update_is_enemy()
 	_update_attack_range()
-	_update_max_health()
 	_update_untargettable()
 
 
 func _physics_process(_delta: float) -> void:
 	if is_dying:
 		velocity = Vector3.ZERO
-	else:
+	elif !on_physics_process.has_connections():
 		# for movement later do something with vectors and also handle walkspeed (de)buffs
 		# (later) basically assume left is the direction we want to go and apply stuff
 		# (later) then apply is_enemy onto it so enemies go right
@@ -136,6 +136,8 @@ func _physics_process(_delta: float) -> void:
 				attack_timer.stop()
 			
 			velocity = _physics_not_attacking()
+	else:
+		on_physics_process.emit()
 	move_and_slide()
 
 
@@ -214,15 +216,19 @@ func get_actual_walkspeed() -> float:
 # can also be used for updating is_alt due to alt forms basically being a separate battler
 func _update_id():
 	# TODO: remove these when a proper spawning function is in place that handles stats itself and not in here i guess?
-	max_health = BattlerEnums.get_health(id)
-	armor = BattlerEnums.get_armor(id)
+	max_health = int(BattlerEnums.get_health(id) * magnification)
+	armor = int(BattlerEnums.get_armor(id) * magnification)
 	resistance = BattlerEnums.get_resistance(id)
-	damage = BattlerEnums.get_damage(id)
+	damage = int(BattlerEnums.get_damage(id) * magnification)
 	attack_rate = BattlerEnums.get_attack_rate(id)
 	attack_range = BattlerEnums.get_attack_range(id)
 	walkspeed = BattlerEnums.get_walkspeed(id)
 	windup = BattlerEnums.get_windup(id)
 	pre_windup = BattlerEnums.get_pre_windup(id)
+	
+	if health_component != null:
+		health_component.max_health = max_health
+		health_component.health = max_health
 	
 	if attack_component != null:
 		attack_component.queue_free()
@@ -259,6 +265,9 @@ func _update_untargettable():
 
 
 func _on_attack_timer_timeout() -> void:
+	if is_dying:
+		return
+	
 	match attacking_state:
 		AttackingState.PRE_WINDUP:
 			if range_detector.is_an_enemy_in_range():

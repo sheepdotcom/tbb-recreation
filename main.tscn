@@ -14,8 +14,10 @@ size = Vector3(60, 2, 13)
 [node name="Main" type="Node3D" unique_id=1660283457]
 metadata/_custom_type_script = "uid://dvf2e7obmiyv4"
 
-[node name="Game" parent="." unique_id=51641545 node_paths=PackedStringArray("parent", "stage_select_container", "unit_container") instance=ExtResource("2_7mycd")]
+[node name="Game" parent="." unique_id=51641545 node_paths=PackedStringArray("parent", "friendly_base", "enemy_base", "stage_select_container", "unit_container") instance=ExtResource("2_7mycd")]
 parent = NodePath("..")
+friendly_base = NodePath("../BaseFriendly")
+enemy_base = NodePath("../BaseEnemy")
 stage_select_container = NodePath("../StageSelectMenu/ScrollContainer/StageSelectContainer")
 unit_container = NodePath("../CanvasLayer/UnitContainer")
 
@@ -66,6 +68,13 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1910531797]
+layer = 2
 
-[node name="UnitContainer" type="Node2D" parent="CanvasLayer" unique_id=1379139107]
-position = Vector2(576, 648)
+[node name="UnitContainer" type="Control" parent="CanvasLayer" unique_id=1264006198]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

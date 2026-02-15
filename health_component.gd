@@ -42,7 +42,7 @@ func damage(amount: int, attacker: HitboxComponent):
 		if parent is Battler:
 			pass
 		elif parent is Base:
-			if other.abilities.has(BattlerEnums.Abilities.BASE_DESTROYER):
+			if other.abilities & BattlerEnums.Abilities.BASE_DESTROYER:
 				amt *= 3.0
 	
 	health = health - round(amt) # TODO: test if .5 rounds up or down (tbb does something wierd i think idk)

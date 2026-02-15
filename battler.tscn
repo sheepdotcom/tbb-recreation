@@ -20,6 +20,7 @@ height = 5.0
 radius = 3.0
 
 [node name="Battler" type="CharacterBody3D" unique_id=577338451]
+collision_layer = 2
 script = ExtResource("1_7jvhn")
 damage = 10
 
