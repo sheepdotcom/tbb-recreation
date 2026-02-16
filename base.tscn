@@ -30,3 +30,6 @@ parent = NodePath("..")
 parent = NodePath("..")
 health_component = NodePath("../HealthComponent")
 shape = SubResource("BoxShape3D_21bcp")
+
+[node name="SpawnPoint" type="Node3D" parent="." unique_id=1726832551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, -4, 0)

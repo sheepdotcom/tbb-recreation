@@ -9,12 +9,15 @@ class_name Base
 			_update_is_enemy()
 
 var hitbox: HitboxComponent
+var spawn_point: Node3D
 
 
 func _ready():
 	hitbox = $HitboxComponent
+	spawn_point = $SpawnPoint
 	
 	assert(hitbox != null)
+	assert(spawn_point != null)
 	
 	_update_is_enemy()
 

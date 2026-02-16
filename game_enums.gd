@@ -3,20 +3,39 @@ extends Node
 class_name GameEnums
 
 enum Chapter {
-	BrickBattle,
-	RedHeights,
-	MachineScream,
-	AcrossHeaven,
-	BattleBricksClassic,
-	BirthdayBash,
-	CoilChaos,
-	RedHerring,
-	BlackBabatala,
-	FrozenLegion,
-	UncookedBusiness,
-	CrimsonSkies,
-	CommunityStages1,
-	CommunityStages2,
-	CommunityStages3,
-	CommunityStages4,
+	BRICK_BATTLE,
+	RED_HEIGHTS,
+	MACHINE_SCREAM,
+	ACROSS_HEAVEN,
+	BATTLE_BRICKS_CLASSIC,
+	BIRTHDAY_BASH,
+	COIL_CHAOS,
+	RED_HERRING,
+	BLACK_BABATALA,
+	FROZEN_LEGION,
+	UNCOOKED_BUSINESS,
+	CRIMSON_SKIES,
+	COMMUNITY_STAGES_1,
+	COMMUNITY_STAGES_2,
+	COMMUNITY_STAGES_3,
+	COMMUNITY_STAGES_4,
+}
+
+enum Bank {
+	DEFAULT,
+	INVESTMENT,
+	POWERHOUSE,
+	DETONATOR,
+	IGNITION,
+	BLOOD_ALTAR,
+}
+
+enum Cannon {
+	DEFAULT,
+	GATLING,
+	SLAMMER,
+	RECOIL,
+	TREASURE,
+	ABSORBER,
+	LIBERTY,
 }

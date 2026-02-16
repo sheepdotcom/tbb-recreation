@@ -73,7 +73,7 @@ func _update_shape_debug_fill():
 	collision_shape.debug_fill = shape_debug_fill
 
 
-# TODO: remove this because it is used only for code that will be replaced with better code later
+# was to be replaced, but it should probably stay, no harm in removing it
 func get_radius() -> float:
 	if collision_shape.shape is CapsuleShape3D:
 		return collision_shape.shape.radius
@@ -83,3 +83,14 @@ func get_radius() -> float:
 		return collision_shape.shape.size.x / 2
 	else:
 		return 0.5 # the default value for when a shape isn't configured i guess?
+
+
+func get_height() -> float:
+	if collision_shape.shape is CapsuleShape3D:
+		return collision_shape.shape.height
+	elif collision_shape.shape is SphereShape3D:
+		return collision_shape.shape.radius
+	elif collision_shape.shape is BoxShape3D:
+		return collision_shape.shape.size.y
+	else:
+		return 5 # default i think?

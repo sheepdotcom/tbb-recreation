@@ -25,7 +25,7 @@ class_name Battler
 # battler damage
 @export var damage := 0
 # battler attack rate
-@export var attack_rate := 2.2 # wiki/in-game says 2.0 seconds, from video battler has 2.6 seconds (are they lying to us???)
+@export var attack_rate := 2.5 # wiki/in-game says 2.0 seconds, its actually 2.5 (game is lie to us? wow)
 # battler range
 @export var attack_range := 3:
 	set(value):
@@ -33,17 +33,10 @@ class_name Battler
 		_update_attack_range()
 # battler walkspeed
 @export var walkspeed := 4.0
-# battler's hidden windup or whatever
-@export var windup := 0.15 # wiki said 0.15 seconds, from video it was 9 frames (0.15 seconds)
-# battler's hidden pre-windup or something idk, like when battlers stop for 0.5 seconds before attacking
-# though some battlers have this at 0 or something (like jetpack)
-@export var pre_windup := 0.53 # guess was 0.5 seconds, from video i think its 32 frames (0.5333 seconds)
-# also 24 frames of animation after attacking (0.4 seconds)
-# and the attack rate then is 132 frames? (2.2 seconds) or 156 frames counting the post-windup animation (2.6 seconds)
-# either i got a bug or sword battler has 0 seconds of pre windup causing his attack animation to happen after windup is finished
-# attack rate for sword battler is 63 frames? (1.05 seconds)
-# most likely be a 3 frame after pre windup windup or something idk
-# sword battler has no pre windup, he instantly attacks (animation bugs a little though)
+
+# the very awesome hidden stats or something
+@export var windup := 0.15 # windup of Battler
+@export var pre_windup := 0.5 # pre-windup of Battler
 
 # magnification determines the multiplier for certain stats ONLY when updating id
 var magnification := 1.0
@@ -71,6 +64,9 @@ var is_dying := false:
 # connecting to this disables the default attack/move function, letting the battler's component handle it all
 signal on_physics_process(delta: float)
 
+var saved_gravity := 0.0
+var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+
 var abilities: int = 0 # abilities (bit flag)
 
 var hitbox: HitboxComponent
@@ -78,7 +74,10 @@ var range_detector: RangeDetectionComponent
 var health_component: HealthComponent
 var attack_timer: Timer
 
-enum AttackingState { NONE, PRE_WINDUP, WINDUP, ATTACKING }
+# should be set by spawn_unit (which SHOULD be the only way they can spawn in)
+var game: Game
+
+enum AttackingState { NONE, PRE_WINDUP, WINDUP, ATTACKING, POST_ATTACK }
 
 var attack_component: CoreBattlerComponent
 var attacking_state := AttackingState.NONE
@@ -112,6 +111,7 @@ func _ready():
 	assert(range_detector != null)
 	assert(health_component != null)
 	assert(attack_timer != null)
+	assert(game != null)
 	
 	_update_id()
 	_update_is_enemy()
@@ -119,7 +119,7 @@ func _ready():
 	_update_untargettable()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if is_dying:
 		velocity = Vector3.ZERO
 	elif !on_physics_process.has_connections():
@@ -138,6 +138,11 @@ func _physics_process(_delta: float) -> void:
 			velocity = _physics_not_attacking()
 	else:
 		on_physics_process.emit()
+	
+	if (abilities & BattlerEnums.Abilities.FLYING) == 0 && !is_on_floor():
+		saved_gravity += gravity * delta
+		velocity.y -= saved_gravity
+	
 	move_and_slide()
 
 

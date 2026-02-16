@@ -33,8 +33,9 @@ static var stat_table: Dictionary[ID, BattlerStats] = {
 	ID.BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent), # x x x
 	ID.BLONDE_BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent), # x x x
 	ID.TROWEL_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.75, 5, 3.0, 7, 100, 0.0, 0.0, TrowelBattlerComponent), # x x x
-	ID.TROWEL_WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent), # Wall
+	ID.TROWEL_WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent), # Wall I
 	#ID.BUILDER_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.8, 5, 3, 7, 100, 0.0, 0.0), # x x x
+	#ID.BUILDER_WALL: BattlerStats.new(180, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0), # Wall II
 	#ID.SWORD_BATTLER: BattlerStats.new(70, 0, 0, 15, 1.03, 5, 4, 6, 150, 0.15, 0.05), # x x x # 1.033 -> 1.03
 	#ID.BRIGAND_BATTLER: BattlerStats.new(70, 0, 0, 30, 3.8, 7, 4, 6, 150, 0.15, 0.5), # x x x
 	#ID.SLINGER_BATTLER: BattlerStats.new(40, 0, 0, 8, 0.525, 12, 3, 8, 200, 0.1, 0.05), # x x x
@@ -119,12 +120,11 @@ enum Abilities {
 	BLIND_IMMUNITY = 1 << 11, # part of "miniboss immunity"
 	SLOW_IMMUNITY = 1 << 12, # part of "final boss immunity"
 	COLD_IMMUNITY = 1 << 13, # part of "final boss immunity"
-	IMMOVABLE = 1 << 14,
-	DAMAGE_REFLECTION = 1 << 15,
-	TUMORED = 1 << 16,
-	FLYING = 1 << 17, # only here cuz probably needed to tell gravity to go away
-	DEPLOYED_ELSEWHERE = 1 << 18, # basically supposed to tell the game to skip putting them at the base (let the battler handle where they will spawn)
-	FIRE_IMMUNITY = 1 << 19,
-	HELLFIRE_IMMUNITY = 1 << 20,
-	OMNI_IMMUNITY = 1 << 21,
+	FIRE_IMMUNITY = 1 << 14,
+	HELLFIRE_IMMUNITY = 1 << 15,
+	IMMOVABLE = 1 << 16,
+	OMNI_IMMUNITY = 1 << 17,
+	TUMORED = 1 << 18,
+	FLYING = 1 << 19, # only here cuz probably needed to tell gravity to go away
+	DEPLOYED_ELSEWHERE = 1 << 20,
 }

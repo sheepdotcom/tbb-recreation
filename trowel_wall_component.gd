@@ -20,5 +20,5 @@ func _ready():
 
 func _on_timer_timeout():
 	is_decaying = true
-	parent.health_component.damage(parent.max_health * 0.1, parent.hitbox)
+	parent.health_component.damage(int(parent.max_health * 0.1), parent.hitbox)
 	timer.start(0.2)
