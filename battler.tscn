@@ -27,6 +27,7 @@ damage = 10
 [node name="Pivot" type="Node3D" parent="." unique_id=1532767645]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Pivot" unique_id=1661415346]
+visible = false
 mesh = SubResource("CapsuleMesh_6qqko")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1973664017]

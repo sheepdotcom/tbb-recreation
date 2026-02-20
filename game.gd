@@ -40,6 +40,7 @@ class_name Game
 var saved_stages: Dictionary[GameEnums.Chapter, int] = {}
 
 var in_stage := true
+var stage_spawn_timer: Timer
 
 var unit_count := 0
 
@@ -67,9 +68,12 @@ var bank_level := 1
 var battler_scene = preload("res://battler.tscn")
 
 func _ready() -> void:
+	stage_spawn_timer = $StageSpawnTimer
+	
 	assert(parent != null)
 	assert(stage_select_container != null)
 	assert(unit_container != null)
+	assert(stage_spawn_timer != null)
 	
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	
@@ -82,6 +86,8 @@ func _ready() -> void:
 		saved_battler_levels[v] = 1
 	
 	add_unit_buttons()
+	
+	start_stage()
 
 
 func _physics_process(_delta: float):
@@ -102,6 +108,15 @@ func _physics_process(_delta: float):
 		spawn_unit_from_loadout(6)
 	if Input.is_action_just_pressed("spawn_unit_8"):
 		spawn_unit_from_loadout(7)
+
+
+func start_stage():
+	stage_spawn_timer.start(10)
+
+
+func _on_stage_spawn_timer_timeout():
+	spawn_unit(BattlerEnums.ID.BATTLER, true, 1.0)
+	stage_spawn_timer.start(5)
 
 
 # dynamically do it i guess idk how fully but whatever

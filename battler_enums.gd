@@ -30,10 +30,10 @@ enum ID {
 # put in the order of attack rate, windup, pre-windup
 # for like all of these GO INGAME AND LOOK AT ALMANAC CUZ WIKI SEEMS TO BE WRONG SOMETIMES (and fix wiki too)
 static var stat_table: Dictionary[ID, BattlerStats] = {
-	ID.BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent), # x x x
-	ID.BLONDE_BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent), # x x x
-	ID.TROWEL_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.75, 5, 3.0, 7, 100, 0.0, 0.0, TrowelBattlerComponent), # x x x
-	ID.TROWEL_WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent), # Wall I
+	ID.BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Battler"), # x x x
+	ID.BLONDE_BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Blonde Battler"), # x x x
+	ID.TROWEL_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.75, 5, 3.0, 7, 100, 0.0, 0.0, TrowelBattlerComponent, "Trowel Battler"), # x x x
+	ID.TROWEL_WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent, "Builder Battler"), # Wall I
 	#ID.BUILDER_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.8, 5, 3, 7, 100, 0.0, 0.0), # x x x
 	#ID.BUILDER_WALL: BattlerStats.new(180, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0), # Wall II
 	#ID.SWORD_BATTLER: BattlerStats.new(70, 0, 0, 15, 1.03, 5, 4, 6, 150, 0.15, 0.05), # x x x # 1.033 -> 1.03
@@ -58,6 +58,14 @@ static func create_component(id: ID) -> CoreBattlerComponent:
 		return component
 	else:
 		return null
+
+
+static func get_displayable_name(id: ID) -> StringName:
+	return stat_table[id].name
+
+
+static func get_model_name(id: ID) -> String:
+	return stat_table[id].model_name
 
 
 static func get_health(id: ID) -> int:

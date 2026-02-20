@@ -5,5 +5,8 @@
 [node name="Game" type="Node" unique_id=1276485015]
 process_priority = -12
 script = ExtResource("1_80nbo")
-chapter = null
-stage = null
+
+[node name="StageSpawnTimer" type="Timer" parent="." unique_id=356805461]
+process_callback = 0
+
+[connection signal="timeout" from="StageSpawnTimer" to="." method="_on_stage_spawn_timer_timeout"]

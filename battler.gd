@@ -73,6 +73,8 @@ var hitbox: HitboxComponent
 var range_detector: RangeDetectionComponent
 var health_component: HealthComponent
 var attack_timer: Timer
+var pivot: Node3D
+var model: Node3D
 
 # should be set by spawn_unit (which SHOULD be the only way they can spawn in)
 var game: Game
@@ -106,11 +108,13 @@ func _ready():
 	range_detector = $RangeDetectionComponent
 	health_component = $HealthComponent
 	attack_timer = $AttackTimer
+	pivot = $Pivot
 	
 	assert(hitbox != null)
 	assert(range_detector != null)
 	assert(health_component != null)
 	assert(attack_timer != null)
+	assert(pivot != null)
 	assert(game != null)
 	
 	_update_id()
@@ -180,7 +184,6 @@ func _physics_attacking() -> Vector3:
 func start_pre_windup():
 	attacking_state = AttackingState.PRE_WINDUP
 	
-	print("pre winding up!")
 	attack_timer.start(pre_windup)
 	
 	on_pre_windup.emit()
@@ -189,7 +192,6 @@ func start_pre_windup():
 func start_windup():
 	attacking_state = AttackingState.WINDUP
 	
-	print("winding up!")
 	attack_timer.start(windup)
 	
 	on_windup.emit()
@@ -198,7 +200,6 @@ func start_windup():
 func do_attack():
 	attacking_state = AttackingState.ATTACKING
 	
-	print("BONK!")
 	attack_timer.start(attack_rate)
 	
 	on_attack.emit()
@@ -245,6 +246,44 @@ func _update_id():
 	on_windup.connect(attack_component._on_windup)
 	on_attack.connect(attack_component._on_attack)
 	on_attack_finished.connect(attack_component._on_attack_finished)
+	
+	if pivot != null:
+		# Ok heres how it will go, every unique battler will have its own model, all 416 of them
+		# Enemies? ugh, texture swap i guess, though i will have to compile some textures myself due to
+		# them being a little weird with how im exporting stuff from roblox studio
+		# shouldnt be a problem though, the main issue is texture swapping, but i think i have a solution
+		# i dont understand why the roblox studio plugin can't handle gears, so i have to do stuff to get gear models
+		var model_name = BattlerEnums.get_model_name(id)
+		
+		var scene: PackedScene = load("res://models/" + model_name + "/model.tscn")
+		
+		assert(scene != null)
+		
+		model = scene.instantiate()
+		
+		# TODO: get the mesh instance and override with proper material
+		if is_enemy:
+			# always an enemy material, just sometimes uses friendly texture cuz no actual enemy texture
+			var enemy_material: BaseMaterial3D = load("res://models/" + model_name + "/enemy.tres")
+			
+			assert(enemy_material != null)
+			
+			var friendly_material: BaseMaterial3D = load("res://models/" + model_name + "/friendly.tres")
+			
+			assert(friendly_material != null)
+			
+			# go through all children (recursive) and change friendly_material to enemy_material
+			for child in model.find_children("*", "", true, false):
+				if child is MeshInstance3D:
+					for i in child.mesh.get_surface_count():
+						var material = child.get_active_material(i)
+						
+						if material == friendly_material:
+							child.set_surface_override_material(i, enemy_material)
+		
+		pivot.add_child(model)
+		
+		model.position = Vector3(0, -2.5, 0)
 	
 	add_child(attack_component)
 

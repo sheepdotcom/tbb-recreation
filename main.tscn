@@ -19,8 +19,6 @@ friendly_base = NodePath("../BaseFriendly")
 enemy_base = NodePath("../BaseEnemy")
 stage_select_container = NodePath("../StageSelectMenu/ScrollContainer/StageSelectContainer")
 unit_container = NodePath("../CanvasLayer/UnitContainer")
-chapter = 0
-stage = 1
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=39553709]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 15)

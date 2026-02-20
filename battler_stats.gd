@@ -2,6 +2,8 @@ extends Resource
 
 class_name BattlerStats
 
+static var STUPID_REGEX := RegEx.create_from_string("[^a-z_]")
+
 @export var health: int
 @export var armor: int
 @export var resistance: int
@@ -17,7 +19,10 @@ class_name BattlerStats
 # guaranteed to be at least a CoreBattlerComponent
 var component: GDScript
 
-func _init(health: int, armor: int, resistance: int, damage: int, attack_rate: float, attack_range: int, walkspeed: float, recharge: int, cost: int, windup: float, pre_windup: float, component: GDScript):
+var name: StringName
+var model_name: String
+
+func _init(health: int, armor: int, resistance: int, damage: int, attack_rate: float, attack_range: int, walkspeed: float, recharge: int, cost: int, windup: float, pre_windup: float, component: GDScript, name: StringName):
 	self.health = health
 	self.armor = armor
 	self.resistance = resistance
@@ -30,8 +35,9 @@ func _init(health: int, armor: int, resistance: int, damage: int, attack_rate: f
 	self.windup = windup
 	self.pre_windup = pre_windup
 	
-	var test = component.new()
-	if test is CoreBattlerComponent:
-		self.component = component
-	else:
-		assert(false, "Component is not of CoreBattlerComponent")
+	assert(component.new() is CoreBattlerComponent, "Component is not of CoreBattlerComponent")
+	self.component = component
+	
+	self.name = name
+	
+	self.model_name = STUPID_REGEX.sub(self.name.to_lower().replace(" ", "_"), "", true)

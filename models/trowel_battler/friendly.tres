@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cemco34g18516"]
+
+[ext_resource type="Texture2D" uid="uid://satkdmmtw2ot" path="res://models/trowel_battler/friendly.png" id="1_myom0"]
+
+[resource]
+resource_name = "Handle1Mtl"
+albedo_texture = ExtResource("1_myom0")

@@ -1,0 +1,7 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://c76ylvocaxcio"]
+
+[ext_resource type="Texture2D" uid="uid://cds5fdknbj8a2" path="res://models/battler/enemy.png" id="1_77d6i"]
+
+[resource]
+resource_name = "R64Mtl"
+albedo_texture = ExtResource("1_77d6i")
