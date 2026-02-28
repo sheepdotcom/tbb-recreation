@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BattlerStats" format=3 uid="uid://h6nhat05pdqt"]
+
+[ext_resource type="Script" uid="uid://05pnbt7tgdc6" path="res://battler_stats.gd" id="1_acgm6"]
+[ext_resource type="Script" uid="uid://bbl0rfpy1k4ht" path="res://basic_attack_component.gd" id="1_cw7wi"]
+
+[resource]
+script = ExtResource("1_acgm6")
+health = 50
+damage = 10
+attack_rate = 2.5
+attack_range = 3
+walkspeed = 4.0
+recharge = 5
+cost = 50
+windup = 0.15
+pre_windup = 0.5
+component = ExtResource("1_cw7wi")
+name = &"Battler"
+metadata/_custom_type_script = "uid://05pnbt7tgdc6"

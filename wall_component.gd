@@ -1,21 +1,29 @@
 extends CoreBattlerComponent
 
-class_name TrowelWallComponent
+class_name WallComponent
 
 var timer := Timer.new()
 
 var is_decaying := false
 
-# TODO: wall decay i guess
-
 func _ready():
-	parent.abilities |= BattlerEnums.Abilities.OMNI_IMMUNITY
-	
 	add_child(timer)
 	
 	timer.timeout.connect(_on_timer_timeout)
 	
 	timer.start(10.0)
+
+
+# do nothing cuz we a wall we don't attack or move
+@warning_ignore("unused_parameter")
+func physics_update(delta: float):
+	pass
+
+
+# do nothing, cuz trowel battler is the one who positions me
+@warning_ignore("unused_parameter")
+func _on_spawn(is_enemy: bool):
+	pass
 
 
 func _on_timer_timeout():

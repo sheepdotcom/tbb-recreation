@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="BattlerStats" format=3 uid="uid://b45ecarpvmnwb"]
+
+[ext_resource type="Script" uid="uid://bwis4657ccmtl" path="res://trowel_battler_component.gd" id="1_iogsc"]
+[ext_resource type="Script" uid="uid://05pnbt7tgdc6" path="res://battler_stats.gd" id="1_k24wd"]
+
+[resource]
+script = ExtResource("1_k24wd")
+health = 30
+damage = 4
+attack_rate = 3.75
+attack_range = 5
+walkspeed = 3.0
+recharge = 7
+cost = 100
+component = ExtResource("1_iogsc")
+name = &"Trowel Battler"
+metadata/_custom_type_script = "uid://05pnbt7tgdc6"

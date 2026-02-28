@@ -31,16 +31,33 @@ func _ready():
 	range_area.area_exited.connect(_on_area_exited)
 	
 	collision_shape = range_area.get_node("CollisionShape3D")
+	
+	# fix for collision shapes being shared across multiple battlers for some reason
+	collision_shape.shape = collision_shape.shape.duplicate()
 
 
 func _on_area_entered(area: Area3D) -> void:
 	if area is HitboxComponent:
 		_hitboxes_in_range.append(area)
+		print()
+		print("enemy" if hitbox_component.is_enemy else "friendly")
+		print("enemy" if area.is_enemy else "friendly")
+		if area.parent is Battler:
+			print("enter: " + BattlerEnums.ID.find_key(area.parent.id))
+		elif area.parent is Base:
+			print("enter: base")
 
 
 func _on_area_exited(area: Area3D) -> void:
 	if area is HitboxComponent:
 		_hitboxes_in_range.erase(area)
+		print()
+		print("enemy" if hitbox_component.is_enemy else "friendly")
+		print("enemy" if area.is_enemy else "friendly")
+		if area.parent is Battler:
+			print("exit: " + BattlerEnums.ID.find_key(area.parent.id))
+		elif area.parent is Base:
+			print("exit: base")
 
 
 func _update_range():
@@ -88,7 +105,7 @@ func run_for_friends_in_range(callback: Callable, include_untargettable := true)
 
 func is_an_enemy_in_range() -> bool:
 	for enemy in _hitboxes_in_range:
-		if enemy.is_enemy != hitbox_component.is_enemy && !enemy.is_untargettable:
+		if (enemy.is_enemy != hitbox_component.is_enemy) && !enemy.is_untargettable:
 			return true
 	
 	return false

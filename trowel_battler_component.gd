@@ -4,7 +4,7 @@ class_name TrowelBattlerComponent
 
 var timer := Timer.new()
 
-var has_built_wall := false
+var wall_on_cooldown := false
 
 func _ready():
 	add_child(timer)
@@ -13,12 +13,17 @@ func _ready():
 
 
 func _on_timer_timeout():
-	has_built_wall = true
+	wall_on_cooldown = false
 
 
 func _on_attack():
 	super._on_attack()
 	
-	if !has_built_wall:
+	if !wall_on_cooldown:
+		var wall := parent.game.spawn_unit(BattlerEnums.ID.WALL, parent.is_enemy, parent.magnification)
+		
+		# global_position is probably a stupid idea but whatever, im only setting it once
+		wall.global_position = global_position + -parent.pivot.basis.z * 3.0 # where he looking, 3 studs forwards
+		
 		timer.start(10.0)
-		has_built_wall = true
+		wall_on_cooldown = true

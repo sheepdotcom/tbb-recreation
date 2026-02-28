@@ -4,6 +4,8 @@ Welcome to the Big TODO!
 o Something in-progress
 x Something done
 
+TBB FONT: Luckiest Guy
+
 x Make basic battler
 x Make battlers move (they go left, or right if enemy!, fear will be added later)
 o Make battlers attack (they stop when in range of an enemy which is yay!)
@@ -22,17 +24,30 @@ o Make battlers have health
 	- Make armor and resistance piercing (preparing for sniper, fencer/scherma, miner/prospect)
 	- (future thing) Make battlers have phases (and could potentially survive lethal hits like lil' cesus, tumored/tarnished sword)
 - Make battlers follow gravity (probably custom idk; maybe not idk)
-- Make bases
-- Make battlers spawnable
-	- Figure out how to make UI
-		- Figure out how to make a button
+o Make bases
+	- Make base have cannon
+x Make battlers spawnable
+	x Figure out how to make UI
+		x Figure out how to make a button
 o Moveable Camera
 	- Moving in a direction tilts the camera a bit that way (i think? idk)
-	- Camera looks towards the camera
-	- Camer shake i guess?
+	- Camera looks in the direction of the mouse
+	- Camera shake i guess?
+o All the Menus
+	o Stage Select
+	- Loadout
+	- Shop
+	- Main Chapter Select
+	- Sub Chapter Select
+	- Title
+	- Difficulty Select
+	- THE ALMANAC
+	- Daily Streak Popup
+	- Badges Popup
+	- Settings Popup
 
 IM SCARED FOR:
-- Storing EVERY SINGLE STAGE IN THE ENTIRE GAME
+o Storing EVERY SINGLE STAGE IN THE ENTIRE GAME
 	- Also enemy cycle, I have to test the timing between EVERY SINGLE ENEMY ON EVERY SINGLE STAGE
 - Anything that doesn't simply do a single attack in a single phase (aka literally every boss)
 - Projectiles
@@ -44,4 +59,6 @@ IM SCARED FOR:
 
 BATTLERS TODO:
 chapter 1 battlers and enemies
-currently implemented: the 8 normal battlers
+currently implemented: the 8 normal battlers (not at all lol)
+	only Battler and Trowel Battler can actually spawn (the rest crash the game cuz no component yet)
+	Blonde Battler and Builder Battler too, also Trowel/Builder can't build walls yet

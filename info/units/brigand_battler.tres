@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="BattlerStats" format=3 uid="uid://c8sbd4p1ad2qx"]
+
+[ext_resource type="Script" uid="uid://bbl0rfpy1k4ht" path="res://basic_attack_component.gd" id="1_03egg"]
+[ext_resource type="Script" uid="uid://05pnbt7tgdc6" path="res://battler_stats.gd" id="1_cv1cr"]
+
+[resource]
+script = ExtResource("1_cv1cr")
+name = &"Brigand Battler"
+health = 70
+damage = 30
+attack_rate = 3.8
+attack_range = 7
+walkspeed = 4.0
+recharge = 6
+cost = 150
+windup = 0.15
+pre_windup = 0.5
+component = ExtResource("1_03egg")
+abilities = 64
+metadata/_custom_type_script = "uid://05pnbt7tgdc6"

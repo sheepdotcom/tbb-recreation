@@ -11,6 +11,11 @@ class_name Game
 		assert(value != null)
 		parent = value
 
+@export var camera: Camera3D:
+	set(value):
+		assert(value != null)
+		camera = value
+
 @export var friendly_base: Base:
 	set(value):
 		assert(value != null)
@@ -21,26 +26,44 @@ class_name Game
 		assert(value != null)
 		enemy_base = value
 
+@export var stage_select_menu: CanvasLayer:
+	set(value):
+		assert(value != null)
+		stage_select_menu = value
+
 @export var stage_select_container: Container:
 	set(value):
 		assert(value != null)
 		stage_select_container = value
+
+@export var in_game_menu: CanvasLayer:
+	set(value):
+		assert(value != null)
+		in_game_menu = value
 
 @export var unit_container: Control:
 	set(value):
 		assert(value != null)
 		unit_container = value
 
-@export var chapter := GameEnums.Chapter.BRICK_BATTLE
-@export var stage := 1:
+@export var current_chapter := GameEnums.Chapter.BRICK_BATTLE
+@export var current_stage := 1: # a stage of 1 here is equal to stage 1, 
 	set(value):
-		stage = max(value, 1)
+		current_stage = max(value, 1)
+
+@export var camera_speed := 16.0
+
+var original_camera_position: Vector3
+
+# Array of StageInfo, won't let me nested type ugh, basically loaded stage info
+static var stages: Dictionary[GameEnums.Chapter, Array] = {}
 
 # save what stage you are on in each chapter so game feel better idk?
 var saved_stages: Dictionary[GameEnums.Chapter, int] = {}
 
-var in_stage := true
+var in_stage := false
 var stage_spawn_timer: Timer
+var enemy_cycle_position := 0
 
 var unit_count := 0
 
@@ -71,23 +94,59 @@ func _ready() -> void:
 	stage_spawn_timer = $StageSpawnTimer
 	
 	assert(parent != null)
+	assert(camera != null)
+	assert(friendly_base != null)
+	assert(enemy_base != null)
+	assert(stage_select_menu != null)
 	assert(stage_select_container != null)
+	assert(in_game_menu != null)
 	assert(unit_container != null)
 	assert(stage_spawn_timer != null)
+	
+	original_camera_position = camera.position
 	
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	
 	for v in GameEnums.Chapter.values():
 		# auto add every chapter with a saved stage of 1, except if the export vars are set to some value use that for that specific chapter
-		saved_stages[v] = stage if v == chapter else 1
+		saved_stages[v] = current_stage if v == current_chapter else 1
 	
 	# TODO: store info someone and retrieve later idk im not doing file storage yet
 	for v in BattlerEnums.ID.values():
 		saved_battler_levels[v] = 1
 	
-	add_unit_buttons()
+	BattlerEnums.fill_the_table()
+	load_chapter_stage_info(GameEnums.Chapter.BRICK_BATTLE)
 	
-	start_stage()
+	add_unit_buttons()
+	in_game_menu.hide()
+	
+	fill_stage_select_container()
+	
+	set_selected_stage(1)
+
+
+func _process(delta: float):
+	if in_stage:
+		var direction = Vector3.ZERO
+		
+		var speed_mult := 1.0
+		
+		if Input.is_action_pressed("move_left"):
+			direction.x -= 1.0
+		if Input.is_action_pressed("move_right"):
+			direction.x += 1.0
+		
+		if Input.is_action_pressed("camera_speed_up"):
+			speed_mult *= 2.0
+		if Input.is_action_pressed("camera_speed_down"):
+			speed_mult *= 0.5
+		
+		# probably not needed but whatever who knows what if more than just moving along the x-axis?
+		if direction != Vector3.ZERO:
+			direction = direction.normalized()
+		
+		camera.position += direction * camera_speed * speed_mult * delta
 
 
 func _physics_process(_delta: float):
@@ -110,33 +169,149 @@ func _physics_process(_delta: float):
 		spawn_unit_from_loadout(7)
 
 
+func get_current_stage_info() -> StageInfo:
+	if !stages.has(current_chapter):
+		return null
+	
+	var chapter := stages[current_chapter]
+	
+	var stage = chapter.get(current_stage - 1)
+	
+	return stage
+
+
 func start_stage():
-	stage_spawn_timer.start(10)
+	stage_select_menu.hide()
+	in_game_menu.show()
+	
+	in_stage = true
+	
+	enemy_cycle_position = 0
+	
+	var stage: StageInfo = get_current_stage_info()
+	
+	if stage == null:
+		push_error("stage is null")
+		return
+	
+	var the_thing: EnemyCycleStorer = stage.enemy_cycle.get(enemy_cycle_position)
+	
+	if the_thing == null:
+		push_error("enemy cycle at index %d is null" % enemy_cycle_position)
+		return
+	
+	stage_spawn_timer.start(the_thing.time_till_spawn)
+
+
+func exit_stage():
+	stage_select_menu.show()
+	in_game_menu.hide()
+	
+	in_stage = false
+	
+	camera.position = original_camera_position
 
 
 func _on_stage_spawn_timer_timeout():
-	spawn_unit(BattlerEnums.ID.BATTLER, true, 1.0)
-	stage_spawn_timer.start(5)
+	var stage: StageInfo = get_current_stage_info()
+	
+	if stage == null:
+		push_error("stage is null")
+		return
+	
+	var the_thing: EnemyCycleStorer = stage.enemy_cycle.get(enemy_cycle_position)
+	
+	if the_thing == null:
+		push_error("enemy cycle at index %d is null" % enemy_cycle_position)
+		return
+	
+	# TODO: if check for if playing on tumore difficulty
+	# TODO: account for other magnifications
+	spawn_unit(the_thing.battler, true, stage.magnification)
+	
+	enemy_cycle_position += 1
+	
+	var another_thing: EnemyCycleStorer = stage.enemy_cycle.get(enemy_cycle_position)
+	
+	if another_thing == null:
+		enemy_cycle_position = 0
+		another_thing = stage.enemy_cycle.get(enemy_cycle_position)
+	
+	stage_spawn_timer.start(another_thing.time_till_spawn)
+
+
+## stage values here MUST start at 1, zero is not valid
+## if stage info fails to load, returns null, yeah YOU gotta handle it
+func get_stage_info_from_file(chapter: GameEnums.Chapter, stage: int) -> StageInfo:
+	var chapter_name: String = GameEnums.Chapter.find_key(chapter)
+	
+	var stage_info: StageInfo = load("res://info/stages/" + chapter_name.to_lower() + ("/%02d.tres" % stage))
+	
+	return stage_info
+
+
+## loads all of the stage info of that chapter into the static variable i have
+## does not load again if that stuff is already in the static variable unless reload is true
+func load_chapter_stage_info(chapter: GameEnums.Chapter, reload := false):
+	if !reload && stages.has(chapter):
+		return
+	
+	var the_array: Array[StageInfo] = []
+	
+	for i in range(1, 31):
+		var stage_info = get_stage_info_from_file(chapter, i)
+		
+		if stage_info == null:
+			break
+		
+		the_array.append(stage_info)
+	
+	stages[chapter] = the_array
 
 
 # dynamically do it i guess idk how fully but whatever
 func fill_stage_select_container():
-	# TODO: figure out what the best way to store EVERY SINGLE STAGE (name, magnification, enemy cycle oh no)
-	for i in range(30):
-		var button := BaseButton.new()
-		button.custom_minimum_size = Vector2(100, 100)
+	# 215 on 16:9, 288 on 21.5:9 (basically wider screen proportionally scaled it up; 288 is roughly 215 * 21.5/16)
+	var button_size = Vector2(215, 100)
+	
+	# TODO: loop through the stages of a chapter instead of this, do when StageInfo stores data for what map to use, map colors, and stage thumbnail
+	for i in range(1, 31):
+		var panel_container := PanelContainer.new()
+		
+		var border_style := StyleBoxFlat.new()
+		
+		border_style.draw_center = false
+		border_style.set_border_width_all(2)
+		border_style.set_corner_radius_all(2)
+		border_style.corner_detail = 1
+		border_style.border_color = Color(0.0, 0.318, 0.545, 1.0)
+		
+		panel_container.add_theme_stylebox_override("panel", border_style)
+		
+		var button := Button.new()
+		button.custom_minimum_size = button_size
 		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		
-		# TODO: Add a texture or something
-		var rect := ColorRect.new()
-		rect.size = Vector2(100, 100)
-		rect.color = Color(1, 1, 1, 1) if i%2==0 else Color(0, 0, 0, 1)
+		var texture = PlaceholderTexture2D.new()
+		texture.size = button_size
 		
-		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.button_up.connect(set_selected_stage.bind(i))
 		
-		button.add_child(rect)
-		stage_select_container.add_child(button)
+		panel_container.add_child(button)
+		stage_select_container.add_child(panel_container)
+
+
+## for stage select menu
+## new_stage starts at 1, so stage 1 is internally integer 1 here
+func set_selected_stage(new_stage: int):
+	var button_size = Vector2(215 + 2 + 2, 100 + 2 + 2)
+	
+	var visible_rect := get_viewport().get_visible_rect()
+	
+	stage_select_container.position.x = (visible_rect.size.x / 2) - (button_size.x / 2) - ((new_stage - 1) * (button_size.x + stage_select_container.get_theme_constant("separation")))
+	
+	current_stage = new_stage
 
 
 func add_unit_buttons():
@@ -146,7 +321,7 @@ func add_unit_buttons():
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	
 	for i in range(8):
-		var button := BaseButton.new()
+		var button := Button.new()
 		button.custom_minimum_size = button_size
 		#button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		#button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -155,16 +330,11 @@ func add_unit_buttons():
 		@warning_ignore("integer_division") # stupid you need this ugh
 		button.position.y = (unit_container.size.y - (button_size.y * 2) - (button_spacing.y / 2)) + ((((i / 4) * 2) - 1) * ((button_size.y / 2) + (button_spacing.y / 2)))
 		
-		var rect := ColorRect.new()
-		rect.size = button_size
-		rect.color = Color.AQUA
-		
-		# insane, no, crazy, or crazy+, whatever, idk wanted to say something fe2 related or something? (44 day streak as of writing this)
-		rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var texture = PlaceholderTexture2D.new()
+		texture.size = button_size
 		
 		button.button_up.connect(spawn_unit_from_loadout.bind(i))
 		
-		button.add_child(rect)
 		unit_container.add_child(button)
 
 
@@ -172,7 +342,8 @@ func level_to_magnification(level: int) -> float:
 	return 1 + ((level - 1) * 0.2)
 
 
-func spawn_unit_from_loadout(num: int):
+## returns the Battler (can be null), cuz its a wrapper around spawn_unit for specifically spawning from the 8 buttons (your loadout)
+func spawn_unit_from_loadout(num: int) -> Battler:
 	if num < 0 || num > 7:
 		return
 	
@@ -180,12 +351,15 @@ func spawn_unit_from_loadout(num: int):
 	
 	if id in BattlerEnums.ID.values():
 		var level = level_to_magnification(saved_battler_levels[id])
-		spawn_unit(id, false, level)
+		return spawn_unit(id, false, level)
+	else:
+		return null
 
 
-func spawn_unit(id: BattlerEnums.ID, is_enemy: bool, magnification := 1.0):
+## returns the Battler (can be null), so you can do stuff with it after it is spawned (if needed)
+func spawn_unit(id: BattlerEnums.ID, is_enemy: bool, magnification := 1.0) -> Battler:
 	if !in_stage:
-		return
+		return null
 	
 	var battler: Battler = battler_scene.instantiate()
 	
@@ -194,15 +368,12 @@ func spawn_unit(id: BattlerEnums.ID, is_enemy: bool, magnification := 1.0):
 	battler.magnification = magnification
 	battler.game = self
 	
+	# adding child to scene calls _ready, ensuring battler component is ready to be used (needed for next step im so smart lol)
 	parent.add_child(battler)
 	
-	# TODO: Deployed Elsewhere should not be an ability
-	if (battler.abilities & BattlerEnums.Abilities.DEPLOYED_ELSEWHERE) == 0:
-		var base := enemy_base if is_enemy else friendly_base
-		
-		var pos := base.spawn_point.global_position
-		pos.y += battler.hitbox.get_height() / 2
-		battler.global_position = pos
+	battler.battler_component._on_spawn(is_enemy)
+	
+	return battler
 
 
 func get_friendly_base_health() -> int:

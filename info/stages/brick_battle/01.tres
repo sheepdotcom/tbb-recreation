@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageInfo" format=3 uid="uid://2nex71yqyyss"]
+
+[ext_resource type="Script" uid="uid://ian163obb0qb" path="res://stage_info.gd" id="1_4x8gc"]
+[ext_resource type="Script" uid="uid://c07uf7ygxndur" path="res://enemy_cycle_storer.gd" id="1_rsd5m"]
+
+[sub_resource type="Resource" id="Resource_k6tes"]
+script = ExtResource("1_rsd5m")
+time_till_spawn = 10.5
+metadata/_custom_type_script = "uid://c07uf7ygxndur"
+
+[resource]
+script = ExtResource("1_4x8gc")
+name = &"The Battle Begins"
+base_hp = 500
+magnification = 1.0
+length = 30
+enemy_limit = 2
+enemy_cycle = Array[ExtResource("1_rsd5m")]([SubResource("Resource_k6tes")])
+metadata/_custom_type_script = "uid://ian163obb0qb"

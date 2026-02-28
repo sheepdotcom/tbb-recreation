@@ -23,7 +23,7 @@ class_name Battler
 # battler resistance
 @export var resistance := 0
 # battler damage
-@export var damage := 0
+@export var damage := 10
 # battler attack rate
 @export var attack_rate := 2.5 # wiki/in-game says 2.0 seconds, its actually 2.5 (game is lie to us? wow)
 # battler range
@@ -61,8 +61,7 @@ var is_dying := false:
 		is_dying = value
 		_update_untargettable()
 
-# connecting to this disables the default attack/move function, letting the battler's component handle it all
-signal on_physics_process(delta: float)
+var disable_physics_process := false
 
 var saved_gravity := 0.0
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -81,13 +80,15 @@ var game: Game
 
 enum AttackingState { NONE, PRE_WINDUP, WINDUP, ATTACKING, POST_ATTACK }
 
-var attack_component: CoreBattlerComponent
+var battler_component: CoreBattlerComponent
 var attacking_state := AttackingState.NONE
 
 signal on_pre_windup() # equivalent of on enemy spotted or something idk
 signal on_windup()
 signal on_attack()
 signal on_attack_finished() # basically called {attack_rate} seconds after on_attack() (which is when battlers usually regain movement)
+
+# already on that boss (signals for the different parts of attack already, still working on components)
 
 # IMPORTANT: HOW TO HANDLE BATTLERS WITH CUSTOM MECHANICS
 # here is a way as an example: Telamon Battler
@@ -102,6 +103,10 @@ signal on_attack_finished() # basically called {attack_rate} seconds after on_at
 # component to then add the jetpack one), or just add or delete them, also remember to use
 # the thing used in HealthComponent to add its children to the component where it is used so children
 # are kept, you know what I mean (its what is done in HealthComponent so the health bar shows up)
+
+func _init():
+	set_physics_process(false)
+
 
 func _ready():
 	hitbox = $HitboxComponent
@@ -124,65 +129,21 @@ func _ready():
 
 
 func _physics_process(delta: float) -> void:
-	if is_dying:
-		velocity = Vector3.ZERO
-	elif !on_physics_process.has_connections():
-		# for movement later do something with vectors and also handle walkspeed (de)buffs
-		# (later) basically assume left is the direction we want to go and apply stuff
-		# (later) then apply is_enemy onto it so enemies go right
-		# (later) this is to handle things like fear or whatever else (when implemented)
-		if range_detector.is_an_enemy_in_range() || attacking_state >= AttackingState.WINDUP:
-			velocity = _physics_attacking()
-		else:
-			# cancel prewindup if enemy exits range
-			if attacking_state == AttackingState.PRE_WINDUP:
-				attacking_state = AttackingState.NONE
-				attack_timer.stop()
-			
-			velocity = _physics_not_attacking()
-	else:
-		on_physics_process.emit()
+	velocity = Vector3.ZERO
 	
-	if (abilities & BattlerEnums.Abilities.FLYING) == 0 && !is_on_floor():
-		saved_gravity += gravity * delta
-		velocity.y -= saved_gravity
+	if !is_dying:
+		battler_component.physics_update(delta)
 	
 	move_and_slide()
 
 
-# runs every _physics_process when not attacking, returns the velocity of the battler
-func _physics_not_attacking() -> Vector3:
-	var new_velocity := Vector3.ZERO
-	
-	new_velocity.x = walkspeed
-
-	if !hitbox.is_enemy:
-		new_velocity.x = -new_velocity.x
-
-	# currently just rotate the battler to face direction of movement
-	# (later) rotate towards target enemy when attacking
-	# (later) about above: rotate towards where enemy last way until battler is done attacking or whatever (when they can start moving/attack again)
-	if new_velocity != Vector3.ZERO:
-		$Pivot.basis = Basis.looking_at(new_velocity)
-	
-	return new_velocity
-
-
-# runs every _physics_process when attacking, returns the velocity of the battler
-func _physics_attacking() -> Vector3:
-	var new_velocity := Vector3.ZERO
-	
-	# start the pre-windup
-	if attacking_state == AttackingState.NONE:
-		start_pre_windup()
-	
-	# the rest is handled by timer and prewindup also by _physics_process
-	
-	return new_velocity
-
-
 func start_pre_windup():
 	attacking_state = AttackingState.PRE_WINDUP
+	
+	if pre_windup <= 0.0:
+		on_pre_windup.emit()
+		attack_timer.timeout.emit()
+		return
 	
 	attack_timer.start(pre_windup)
 	
@@ -192,6 +153,11 @@ func start_pre_windup():
 func start_windup():
 	attacking_state = AttackingState.WINDUP
 	
+	if windup <= 0.0:
+		on_windup.emit()
+		attack_timer.timeout.emit()
+		return
+	
 	attack_timer.start(windup)
 	
 	on_windup.emit()
@@ -199,6 +165,11 @@ func start_windup():
 
 func do_attack():
 	attacking_state = AttackingState.ATTACKING
+	
+	if attack_rate <= 0.0:
+		on_attack.emit()
+		attack_timer.timeout.emit()
+		return
 	
 	attack_timer.start(attack_rate)
 	
@@ -232,20 +203,22 @@ func _update_id():
 	windup = BattlerEnums.get_windup(id)
 	pre_windup = BattlerEnums.get_pre_windup(id)
 	
+	abilities = BattlerEnums.get_abilities(id)
+	
 	if health_component != null:
 		health_component.max_health = max_health
 		health_component.health = max_health
 	
-	if attack_component != null:
-		attack_component.queue_free()
+	if battler_component != null:
+		battler_component.queue_free()
 	
-	attack_component = BattlerEnums.create_component(id)
-	attack_component.parent = self
+	battler_component = BattlerEnums.create_component(id)
+	battler_component.parent = self
 	
-	on_pre_windup.connect(attack_component._on_pre_windup)
-	on_windup.connect(attack_component._on_windup)
-	on_attack.connect(attack_component._on_attack)
-	on_attack_finished.connect(attack_component._on_attack_finished)
+	on_pre_windup.connect(battler_component._on_pre_windup)
+	on_windup.connect(battler_component._on_windup)
+	on_attack.connect(battler_component._on_attack)
+	on_attack_finished.connect(battler_component._on_attack_finished)
 	
 	if pivot != null:
 		# Ok heres how it will go, every unique battler will have its own model, all 416 of them
@@ -253,39 +226,50 @@ func _update_id():
 		# them being a little weird with how im exporting stuff from roblox studio
 		# shouldnt be a problem though, the main issue is texture swapping, but i think i have a solution
 		# i dont understand why the roblox studio plugin can't handle gears, so i have to do stuff to get gear models
-		var model_name = BattlerEnums.get_model_name(id)
+		var model_name := BattlerEnums.get_model_name(id)
 		
 		var scene: PackedScene = load("res://models/" + model_name + "/model.tscn")
 		
-		assert(scene != null)
-		
-		model = scene.instantiate()
-		
-		# TODO: get the mesh instance and override with proper material
-		if is_enemy:
-			# always an enemy material, just sometimes uses friendly texture cuz no actual enemy texture
-			var enemy_material: BaseMaterial3D = load("res://models/" + model_name + "/enemy.tres")
+		if scene != null:
+			model = scene.instantiate()
 			
-			assert(enemy_material != null)
+			# TODO: get the mesh instance and override with proper material
+			if is_enemy:
+				# always an enemy material, just sometimes uses friendly texture cuz no actual enemy texture
+				var enemy_material: BaseMaterial3D = load("res://models/" + model_name + "/enemy.tres")
+				
+				assert(enemy_material != null)
+				
+				var friendly_material: BaseMaterial3D = load("res://models/" + model_name + "/friendly.tres")
+				
+				assert(friendly_material != null)
+				
+				# go through all children (recursive) and change friendly_material to enemy_material
+				for child in model.find_children("*", "", true, false):
+					if child is MeshInstance3D:
+						for i in child.mesh.get_surface_count():
+							var material = child.get_active_material(i)
+							
+							if material == friendly_material:
+								child.set_surface_override_material(i, enemy_material)
 			
-			var friendly_material: BaseMaterial3D = load("res://models/" + model_name + "/friendly.tres")
+			pivot.add_child(model)
 			
-			assert(friendly_material != null)
+			model.position = Vector3(0, -2.5, 0)
+		else:
+			var mesh_instance := MeshInstance3D.new()
 			
-			# go through all children (recursive) and change friendly_material to enemy_material
-			for child in model.find_children("*", "", true, false):
-				if child is MeshInstance3D:
-					for i in child.mesh.get_surface_count():
-						var material = child.get_active_material(i)
-						
-						if material == friendly_material:
-							child.set_surface_override_material(i, enemy_material)
-		
-		pivot.add_child(model)
-		
-		model.position = Vector3(0, -2.5, 0)
+			var mesh := CapsuleMesh.new()
+			mesh.radius = 1
+			mesh.height = 5
+			
+			mesh_instance.mesh = mesh
+			
+			model = mesh_instance
+			
+			pivot.add_child(model)
 	
-	add_child(attack_component)
+	add_child(battler_component)
 
 
 func _update_is_enemy():

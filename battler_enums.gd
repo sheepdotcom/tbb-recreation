@@ -7,9 +7,9 @@ enum ID {
 	BATTLER = 1,
 	BLONDE_BATTLER,
 	TROWEL_BATTLER, # TODO: Trowel_Component
-	TROWEL_WALL, # TODO: Trowel_Wall_Component
+	WALL, # TODO: Wall_Component
 	BUILDER_BATTLER, # TODO: Builder_Component
-	BUILDER_WALL, # TODO: Builder_Wall_Component
+	BIG_WALL, # TODO: Big_Wall_Component
 	SWORD_BATTLER,
 	BRIGAND_BATTLER,
 	SLINGER_BATTLER, # TODO: Basic_Projectile_Component i guess?
@@ -30,12 +30,12 @@ enum ID {
 # put in the order of attack rate, windup, pre-windup
 # for like all of these GO INGAME AND LOOK AT ALMANAC CUZ WIKI SEEMS TO BE WRONG SOMETIMES (and fix wiki too)
 static var stat_table: Dictionary[ID, BattlerStats] = {
-	ID.BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Battler"), # x x x
-	ID.BLONDE_BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Blonde Battler"), # x x x
-	ID.TROWEL_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.75, 5, 3.0, 7, 100, 0.0, 0.0, TrowelBattlerComponent, "Trowel Battler"), # x x x
-	ID.TROWEL_WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent, "Builder Battler"), # Wall I
+	#ID.BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Battler"), # x x x
+	#ID.BLONDE_BATTLER: BattlerStats.new(50, 0, 0, 10, 2.5, 3, 4.0, 5, 50, 0.15, 0.5, BasicAttackComponent, "Blonde Battler"), # x x x
+	#ID.TROWEL_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.75, 5, 3.0, 7, 100, 0.0, 0.0, TrowelBattlerComponent, "Trowel Battler"), # x x x
+	#ID.WALL: BattlerStats.new(90, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0.0, 0.0, TrowelWallComponent, "Builder Battler"), # Wall I
 	#ID.BUILDER_BATTLER: BattlerStats.new(30, 0, 0, 4, 3.8, 5, 3, 7, 100, 0.0, 0.0), # x x x
-	#ID.BUILDER_WALL: BattlerStats.new(180, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0), # Wall II
+	#ID.BIG_WALL: BattlerStats.new(180, 0, 0, 0, 0.0, 0.0, 0.0, 0, 0, 0.0, 0.0), # Wall II
 	#ID.SWORD_BATTLER: BattlerStats.new(70, 0, 0, 15, 1.03, 5, 4, 6, 150, 0.15, 0.05), # x x x # 1.033 -> 1.03
 	#ID.BRIGAND_BATTLER: BattlerStats.new(70, 0, 0, 30, 3.8, 7, 4, 6, 150, 0.15, 0.5), # x x x
 	#ID.SLINGER_BATTLER: BattlerStats.new(40, 0, 0, 8, 0.525, 12, 3, 8, 200, 0.1, 0.05), # x x x
@@ -65,7 +65,7 @@ static func get_displayable_name(id: ID) -> StringName:
 
 
 static func get_model_name(id: ID) -> String:
-	return stat_table[id].model_name
+	return ID.find_key(id).to_lower()
 
 
 static func get_health(id: ID) -> int:
@@ -112,6 +112,32 @@ static func get_pre_windup(id: ID) -> float:
 	return stat_table[id].pre_windup
 
 
+static func get_abilities(id: ID) -> int:
+	return stat_table[id].abilities
+
+
+static func fill_the_table(reload := false):
+	if !reload && !stat_table.is_empty():
+		return
+	
+	stat_table = {}
+	
+	for id in ID.keys():
+		var info = _load_battler_info(id.to_lower())
+		
+		if info == null:
+			continue
+		
+		stat_table[ID[id]] = info
+
+
+static func _load_battler_info(file_name: String) -> BattlerStats:
+	var info: BattlerStats = load("res://info/units/" + file_name + ".tres")
+	
+	return info
+
+
+# NOTE: also update the editor hints in battler_stats.gd when updating this
 # note for adding things to this list: only abilities from the wiki that are PERMANENT, invincibility and i-frames are examples of TEMPORARY ones
 enum Abilities {
 	RED = 1 << 0, # anger explosion
@@ -120,19 +146,23 @@ enum Abilities {
 	ZOMBIE = 1 << 3, # probably not being used
 	DEVIL = 1 << 4, # definitely not being used (we don't even know what it'll do)
 	STARRED = 1 << 5, # definitely not being used (we don't even know what it'll do)
-	BASE_DESTROYER = 1 << 6, # 3x damage to bases
-	KNOCKBACK_IMMUNITY = 1 << 7,
-	TRIP_IMMUNITY = 1 << 8,
-	ANNOY_IMMUNITY = 1 << 9,
-	FEAR_IMMUNITY = 1 << 10, # part of "miniboss immunity"
-	BLIND_IMMUNITY = 1 << 11, # part of "miniboss immunity"
-	SLOW_IMMUNITY = 1 << 12, # part of "final boss immunity"
-	COLD_IMMUNITY = 1 << 13, # part of "final boss immunity"
-	FIRE_IMMUNITY = 1 << 14,
-	HELLFIRE_IMMUNITY = 1 << 15,
-	IMMOVABLE = 1 << 16,
-	OMNI_IMMUNITY = 1 << 17,
-	TUMORED = 1 << 18,
-	FLYING = 1 << 19, # only here cuz probably needed to tell gravity to go away
-	DEPLOYED_ELSEWHERE = 1 << 20,
+	ANTI_RED = 1 << 6,
+	ANTI_BLACK = 1 << 7,
+	ANTI_ANGEL = 1 << 8,
+	ANTI_ZOMBIE = 1 << 9,
+	ANTI_DEVIL = 1 << 10,
+	ANTI_STARRED = 1 << 11,
+	BASE_DESTROYER = 1 << 12, # 3x damage to bases
+	KNOCKBACK_IMMUNITY = 1 << 13,
+	TRIP_IMMUNITY = 1 << 14,
+	ANNOY_IMMUNITY = 1 << 15,
+	FEAR_IMMUNITY = 1 << 16, # part of "miniboss immunity"
+	BLIND_IMMUNITY = 1 << 17, # part of "miniboss immunity"
+	SLOW_IMMUNITY = 1 << 18, # part of "final boss immunity"
+	COLD_IMMUNITY = 1 << 19, # part of "final boss immunity"
+	FIRE_IMMUNITY = 1 << 20,
+	HELLFIRE_IMMUNITY = 1 << 21,
+	IMMOVABLE = 1 << 22,
+	OMNI_IMMUNITY = 1 << 23,
+	TUMORED = 1 << 24,
 }

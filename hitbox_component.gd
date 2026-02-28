@@ -51,6 +51,9 @@ func _ready():
 	collision_shape = $CollisionShape3D
 	assert(collision_shape != null)
 	
+	# fix collision shape issues (mainly a fix for range detection, useful for future stuff though)
+	collision_shape.shape = collision_shape.shape.duplicate()
+	
 	_update_shape()
 	_update_shape_disabled()
 	_update_shape_debug_color()
